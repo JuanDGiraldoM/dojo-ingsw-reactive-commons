@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class QueryTasks {
-    private static final String NAME = "tasks.getAll";
+    public static final String NAME = "tasks.getAll";
     private String personName;
     private String requester;
 }

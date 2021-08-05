@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SaveWho {
-    private static final String NAME = "system.save.who";
+    public static final String NAME = "system.save.who";
     private String who;
     private String appName;
 }
