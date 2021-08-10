@@ -23,10 +23,8 @@ import reactor.core.publisher.Mono;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
-
 @Configuration
 public class ListenerConfig {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ListenerConfig.class);
 
     @Autowired
@@ -59,16 +57,15 @@ public class ListenerConfig {
     }
 
     @Bean
-    public HandlerRegistry handlerRegistry(){
+    public HandlerRegistry handlerRegistry() {
         return HandlerRegistry.register()
-                .listenEvent(Whois.NAME,this::listenWhois,Whois.class)
+                .listenEvent(Whois.NAME, this::listenWhois, Whois.class)
                 .handleCommand(SaveWho.NAME, this::handleSaveWho, SaveWho.class);
     }
-    
-    public Mono<Void> listenWhois(DomainEvent<Whois> event){
-        if(event.getData().getWho().equals(nameWho)) {
-            LOGGER.info("Who is for me");
 
+    public Mono<Void> listenWhois(DomainEvent<Whois> event) {
+        if (event.getData().getWho().equals(nameWho)) {
+            LOGGER.info("Who is for me!");
             SaveWho saveWho = SaveWho.builder().who(nameWho).appName(appName).build();
             return commandGateway.saveWho(saveWho, event.getData().getReplyTo());
         }
@@ -77,7 +74,7 @@ public class ListenerConfig {
     }
 
     public Mono<Void> handleSaveWho(Command<SaveWho> command) {
-
+        LOGGER.info("Sending command...");
         return Mono.empty();
     }
 }

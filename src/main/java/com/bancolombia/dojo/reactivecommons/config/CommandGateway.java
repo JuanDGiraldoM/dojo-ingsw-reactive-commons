@@ -18,9 +18,9 @@ public class CommandGateway {
     @Autowired
     private DirectAsyncGateway directAsyncGateway;
 
-    public Mono<Void> saveWho(SaveWho saveWho,String target){
-        Command<SaveWho> command = new Command<>(SaveWho.NAME, UUID.randomUUID().toString(),saveWho);
-        return directAsyncGateway.sendCommand(command,target);
+    public Mono<Void> saveWho(SaveWho saveWho, String target) {
+        Command<SaveWho> command = new Command<>(SaveWho.NAME, UUID.randomUUID().toString(), saveWho);
+        return directAsyncGateway.sendCommand(command, target);
     }
 
 

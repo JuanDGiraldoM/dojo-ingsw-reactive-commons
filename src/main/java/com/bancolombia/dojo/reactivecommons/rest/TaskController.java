@@ -1,9 +1,12 @@
 package com.bancolombia.dojo.reactivecommons.rest;
 
 import com.bancolombia.dojo.reactivecommons.config.EventGateway;
+import com.bancolombia.dojo.reactivecommons.config.ListenerConfig;
 import com.bancolombia.dojo.reactivecommons.config.TaskRepository;
 import com.bancolombia.dojo.reactivecommons.model.Task;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -20,6 +23,7 @@ import java.util.List;
 
 @RestController
 public class TaskController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
     @Value("${spring.application.name}")
     private String appName;
@@ -29,8 +33,6 @@ public class TaskController {
 
     @Autowired
     private TaskRepository repository;
-
-    @Autowired
     private EventGateway eventGateway;
 
     @GetMapping(path = "/tasks/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,8 +46,7 @@ public class TaskController {
 
         if (name.equals(nameWho)) {
             return repository.saveTask(task);
-        }
-        else {
+        } else {
             eventGateway.emitWhoIs(name, appName);
             // TODO asociar respuesta desde el comando
         }
