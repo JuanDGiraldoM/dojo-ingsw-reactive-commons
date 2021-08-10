@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CommandGateway {
 
-    private  final DirectAsyncGateway directAsyncGateway;
+    private final DirectAsyncGateway directAsyncGateway;
 
     public Mono<Void> saveWho(SaveWho saveWho,String target){
         Command<SaveWho> command = new Command<>(SaveWho.NAME, UUID.randomUUID().toString(),saveWho);

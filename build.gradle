@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.bancolombia.dojo'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '1.8'
 
 configurations {
     compileOnly {
@@ -28,6 +28,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'io.projectreactor:reactor-test'
+    implementation 'org.springframework.amqp:spring-rabbit'
 }
 
 configurations.all {
