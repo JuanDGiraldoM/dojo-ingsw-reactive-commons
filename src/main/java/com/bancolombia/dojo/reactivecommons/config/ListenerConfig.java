@@ -12,6 +12,7 @@ import org.reactivecommons.async.api.HandlerRegistry;
 import org.reactivecommons.async.impl.config.ConnectionFactoryProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,12 +25,12 @@ import java.security.NoSuchAlgorithmException;
 
 
 @Configuration
-@AllArgsConstructor
 public class ListenerConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ListenerConfig.class);
 
-    private final CommandGateway commandGateway;
+    @Autowired
+    private CommandGateway commandGateway;
 
     @Value("${spring.application.name}")
     private String appName;

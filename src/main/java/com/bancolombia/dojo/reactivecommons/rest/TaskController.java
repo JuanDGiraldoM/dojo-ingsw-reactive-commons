@@ -4,6 +4,7 @@ import com.bancolombia.dojo.reactivecommons.config.EventGateway;
 import com.bancolombia.dojo.reactivecommons.config.TaskRepository;
 import com.bancolombia.dojo.reactivecommons.model.Task;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
 public class TaskController {
 
     @Value("${spring.application.name}")
@@ -27,9 +27,11 @@ public class TaskController {
     @Value("${spring.node.name}")
     private String nameWho;
 
-    private final TaskRepository repository;
+    @Autowired
+    private TaskRepository repository;
 
-    private final EventGateway eventGateway;
+    @Autowired
+    private EventGateway eventGateway;
 
     @GetMapping(path = "/tasks/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<List<Task>> listTasks(@PathVariable("name") String name) {
