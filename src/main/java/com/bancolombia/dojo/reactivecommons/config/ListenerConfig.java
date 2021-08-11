@@ -1,7 +1,5 @@
 package com.bancolombia.dojo.reactivecommons.config;
 
-
-import com.bancolombia.dojo.reactivecommons.messages.SaveTask;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import com.rabbitmq.client.ConnectionFactory;
@@ -10,10 +8,9 @@ import org.reactivecommons.api.domain.Command;
 import org.reactivecommons.api.domain.DomainEvent;
 import org.reactivecommons.async.api.HandlerRegistry;
 import org.reactivecommons.async.impl.config.ConnectionFactoryProvider;
+import org.reactivecommons.async.impl.config.annotations.EnableMessageListeners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,18 +20,14 @@ import reactor.core.publisher.Mono;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
+@EnableMessageListeners
+@AllArgsConstructor
 @Configuration
 public class ListenerConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(ListenerConfig.class);
 
-    @Autowired
+    private Constants constants;
     private CommandGateway commandGateway;
-
-    @Value("${spring.application.name}")
-    private String appName;
-
-    @Value("${spring.node.name}")
-    private String nameWho;
 
     private void configureSsl(ConnectionFactory connectionFactory) {
         try {
@@ -64,17 +57,18 @@ public class ListenerConfig {
     }
 
     public Mono<Void> listenWhois(DomainEvent<Whois> event) {
-        if (event.getData().getWho().equals(nameWho)) {
+        if (event.getData().getWho().equals(constants.getNameWho())) {
             LOGGER.info("Who is for me!");
-            SaveWho saveWho = SaveWho.builder().who(nameWho).appName(appName).build();
+            SaveWho saveWho = SaveWho.builder()
+                    .who(constants.getNameWho()).appName(constants.getAppName()).build();
             return commandGateway.saveWho(saveWho, event.getData().getReplyTo());
         }
-
+        LOGGER.info("Whois for {} ignored", event.getData().getWho());
         return Mono.empty();
     }
 
     public Mono<Void> handleSaveWho(Command<SaveWho> command) {
-        LOGGER.info("Sending command...");
+        LOGGER.info("Command Received from {}...", command.getData().getWho());
         return Mono.empty();
     }
 }

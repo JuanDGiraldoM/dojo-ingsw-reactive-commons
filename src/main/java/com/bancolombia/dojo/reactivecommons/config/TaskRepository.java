@@ -17,14 +17,13 @@ public class TaskRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskRepository.class);
     private static final List<Task> taskList = new CopyOnWriteArrayList<>();
 
-    public Mono<Void> saveTask(Task task) {
-        taskList.add(task);
-        LOGGER.info("Task '{}' saved", task.getName());
-        return Mono.empty();
+    public Mono<String> saveTask(Task task) {
+        return Mono.just(taskList.add(task))
+                .doOnSuccess(s -> LOGGER.info("Task '{}' saved", task.getName()))
+                .thenReturn("Task saved!");
     }
 
     public Mono<TaskList> getTaskList() {
-        TaskList list = TaskList.builder().taskList(taskList).build();
-        return Mono.just(list);
+        return Mono.just(TaskList.builder().taskList(taskList).build());
     }
 }
