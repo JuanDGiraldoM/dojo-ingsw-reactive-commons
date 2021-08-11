@@ -5,7 +5,7 @@ import com.bancolombia.dojo.reactivecommons.config.EventGateway;
 import com.bancolombia.dojo.reactivecommons.config.TaskRepository;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import com.bancolombia.dojo.reactivecommons.model.Task;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TaskController {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskController.class);
 
-    private Constants constants;
-    private TaskRepository repository;
-    private EventGateway eventGateway;
+    private final Constants constants;
+    private final TaskRepository repository;
+    private final EventGateway eventGateway;
 
     @GetMapping(path = "/tasks/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Void> listTasks(@PathVariable("name") String name) {

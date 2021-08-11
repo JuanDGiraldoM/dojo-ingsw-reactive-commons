@@ -3,7 +3,7 @@ package com.bancolombia.dojo.reactivecommons.config;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import com.rabbitmq.client.ConnectionFactory;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.reactivecommons.api.domain.Command;
 import org.reactivecommons.api.domain.DomainEvent;
 import org.reactivecommons.async.api.HandlerRegistry;
@@ -21,13 +21,13 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
 @EnableMessageListeners
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Configuration
 public class ListenerConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(ListenerConfig.class);
 
-    private Constants constants;
-    private CommandGateway commandGateway;
+    private final Constants constants;
+    private final CommandGateway commandGateway;
 
     private void configureSsl(ConnectionFactory connectionFactory) {
         try {
