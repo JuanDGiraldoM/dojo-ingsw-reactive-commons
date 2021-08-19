@@ -1,24 +1,23 @@
 package com.bancolombia.dojo.reactivecommons.config;
 
+import com.bancolombia.dojo.reactivecommons.gateways.CommandGateway;
+import com.bancolombia.dojo.reactivecommons.gateways.EventGateway;
+import com.bancolombia.dojo.reactivecommons.messages.QueryTasks;
+import com.bancolombia.dojo.reactivecommons.messages.SaveTask;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
-import com.rabbitmq.client.ConnectionFactory;
+import com.bancolombia.dojo.reactivecommons.model.TaskList;
+import com.bancolombia.dojo.reactivecommons.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.api.domain.Command;
 import org.reactivecommons.api.domain.DomainEvent;
 import org.reactivecommons.async.api.HandlerRegistry;
-import org.reactivecommons.async.impl.config.ConnectionFactoryProvider;
 import org.reactivecommons.async.impl.config.annotations.EnableMessageListeners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
 @EnableMessageListeners
 @RequiredArgsConstructor
@@ -27,33 +26,17 @@ public class ListenerConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(ListenerConfig.class);
 
     private final Constants constants;
+    private final TaskRepository repository;
     private final CommandGateway commandGateway;
-
-    private void configureSsl(ConnectionFactory connectionFactory) {
-        try {
-            connectionFactory.useSslProtocol();
-        } catch (NoSuchAlgorithmException | KeyManagementException exception) {
-            LOGGER.error(exception.getMessage());
-        }
-    }
-
-    @Bean
-    @Primary
-    public ConnectionFactoryProvider connection(RabbitProperties rabbitProperties) {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(rabbitProperties.getHost());
-        connectionFactory.setPort(rabbitProperties.getPort());
-        connectionFactory.setUsername(rabbitProperties.getUsername());
-        connectionFactory.setPassword(rabbitProperties.getPassword());
-        configureSsl(connectionFactory);
-        return () -> connectionFactory;
-    }
+    private final EventGateway eventGateway;
 
     @Bean
     public HandlerRegistry handlerRegistry() {
         return HandlerRegistry.register()
                 .listenEvent(Whois.NAME, this::listenWhois, Whois.class)
-                .handleCommand(SaveWho.NAME, this::handleSaveWho, SaveWho.class);
+                .handleCommand(SaveWho.NAME, this::handleSaveWho, SaveWho.class)
+                .handleCommand(SaveTask.NAME, this::handleSaveTask, SaveTask.class)
+                .serveQuery(QueryTasks.NAME, this::queryTask, QueryTasks.class);
     }
 
     public Mono<Void> listenWhois(DomainEvent<Whois> event) {
@@ -68,7 +51,21 @@ public class ListenerConfig {
     }
 
     public Mono<Void> handleSaveWho(Command<SaveWho> command) {
-        LOGGER.info("Command Received from {}...", command.getData().getWho());
+        LOGGER.info("Resolve {} to {}",
+                command.getData().getWho(), command.getData().getAppName());
+        eventGateway.routeReply(command.getData().getWho(), command.getData());
         return Mono.empty();
     }
+
+    public Mono<Void> handleSaveTask(Command<SaveTask> command) {
+        LOGGER.info("Saving task {}", command.getData().getName());
+        repository.saveTask(command.getData());
+        return Mono.empty();
+    }
+
+    public Mono<TaskList> queryTask(QueryTasks queryTasks) {
+        LOGGER.info("Sending task to {}", queryTasks.getRequester());
+        return repository.getTaskList();
+    }
+
 }
