@@ -2,9 +2,11 @@ package com.bancolombia.dojo.reactivecommons.config;
 
 import com.bancolombia.dojo.reactivecommons.gateways.CommandGateway;
 import com.bancolombia.dojo.reactivecommons.gateways.ReplyRouter;
+import com.bancolombia.dojo.reactivecommons.messages.QueryTasks;
 import com.bancolombia.dojo.reactivecommons.messages.SaveTask;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
+import com.bancolombia.dojo.reactivecommons.model.TaskList;
 import com.bancolombia.dojo.reactivecommons.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.api.domain.Command;
@@ -33,7 +35,8 @@ public class ListenerConfig {
         return HandlerRegistry.register()
                 .listenEvent(Whois.NAME, this::listenWhois, Whois.class)
                 .handleCommand(SaveWho.NAME, this::handleSaveWho, SaveWho.class)
-                .handleCommand(SaveTask.NAME, this::handleSaveTask, SaveTask.class);
+                .handleCommand(SaveTask.NAME, this::handleSaveTask, SaveTask.class)
+                .serveQuery(QueryTasks.NAME, this::queryTasks, QueryTasks.class);
     }
 
     public Mono<Void> listenWhois(DomainEvent<Whois> event) {
@@ -58,5 +61,10 @@ public class ListenerConfig {
         LOGGER.info("Saving Task with Name {}...", command.getData().getName());
         repository.saveTask(command.getData());
         return Mono.empty();
+    }
+
+    public Mono<TaskList> queryTasks(QueryTasks query) {
+        LOGGER.info("Sending Tasks to {}...", query.getRequester());
+        return repository.getTaskList();
     }
 }
