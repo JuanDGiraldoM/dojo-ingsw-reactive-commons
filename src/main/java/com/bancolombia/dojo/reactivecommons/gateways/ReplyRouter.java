@@ -4,27 +4,27 @@ import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.UnicastProcessor;
-import reactor.util.concurrent.Queues;
+import reactor.core.publisher.Sinks;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @AllArgsConstructor
 public class ReplyRouter {
-    private final ConcurrentHashMap<String, UnicastProcessor<SaveWho>> processors = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<String, Sinks.One<SaveWho>> processors = new ConcurrentHashMap<>();
 
     public Mono<SaveWho> register(String correlationID) {
-        final UnicastProcessor<SaveWho> processor = UnicastProcessor.create(Queues.<SaveWho>one().get());
+        final Sinks.One<SaveWho> processor = Sinks.one();
         processors.put(correlationID, processor);
-        return processor.singleOrEmpty();
+        return processor.asMono();
     }
 
     public void routeReply(String correlationID, SaveWho data) {
-        final UnicastProcessor<SaveWho> processor = processors.remove(correlationID);
+        final Sinks.One<SaveWho> processor = processors.remove(correlationID);
         if (processor != null) {
-            processor.onNext(data);
-            processor.onComplete();
+            processor.tryEmitValue(data);
+            processors.remove(correlationID);
         }
     }
 }

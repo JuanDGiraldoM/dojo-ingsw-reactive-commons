@@ -1,12 +1,12 @@
 plugins {
-    id 'org.springframework.boot' version '2.2.9.RELEASE'
+    id 'org.springframework.boot' version '2.5.4'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
 }
 
 group = 'com.bancolombia.dojo'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = '11'
 
 configurations {
     compileOnly {
@@ -20,6 +20,8 @@ repositories {
 }
 
 dependencies {
+    implementation 'io.projectreactor:reactor-core'
+    implementation 'io.projectreactor.addons:reactor-extra'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.reactivecommons:async-commons-rabbit-starter:1.0.0-beta9'
     compileOnly 'org.projectlombok:lombok'
@@ -31,8 +33,8 @@ dependencies {
 }
 
 configurations.all {
-    resolutionStrategy.eachDependency {DependencyResolveDetails details ->
-        if (details.requested.group == 'io.projectreactor.rabbitmq'){
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'io.projectreactor.rabbitmq') {
             details.useVersion('1.5.0-M2')
             details.because('Upgrade')
         }
@@ -41,4 +43,9 @@ configurations.all {
 
 test {
     useJUnitPlatform()
+}
+
+wrapper {
+    gradleVersion = '7.2'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-7.2-bin.zip"
 }
