@@ -2,6 +2,7 @@ package com.bancolombia.dojo.reactivecommons.config;
 
 import com.bancolombia.dojo.reactivecommons.gateways.CommandGateway;
 import com.bancolombia.dojo.reactivecommons.gateways.EventGateway;
+import com.bancolombia.dojo.reactivecommons.gateways.ReplyRouter;
 import com.bancolombia.dojo.reactivecommons.messages.QueryTasks;
 import com.bancolombia.dojo.reactivecommons.messages.SaveTask;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
@@ -29,6 +30,7 @@ public class ListenerConfig {
     private final TaskRepository repository;
     private final CommandGateway commandGateway;
     private final EventGateway eventGateway;
+    private final ReplyRouter replyRouter;
 
     @Bean
     public HandlerRegistry handlerRegistry() {
@@ -53,7 +55,7 @@ public class ListenerConfig {
     public Mono<Void> handleSaveWho(Command<SaveWho> command) {
         LOGGER.info("Resolve {} to {}",
                 command.getData().getWho(), command.getData().getAppName());
-        eventGateway.routeReply(command.getData().getWho(), command.getData());
+        replyRouter.routeReply(command.getData().getWho(), command.getData());
         return Mono.empty();
     }
 

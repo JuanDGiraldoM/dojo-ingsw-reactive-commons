@@ -3,6 +3,7 @@ package com.bancolombia.dojo.reactivecommons.rest;
 import com.bancolombia.dojo.reactivecommons.config.Constants;
 import com.bancolombia.dojo.reactivecommons.gateways.CommandGateway;
 import com.bancolombia.dojo.reactivecommons.gateways.EventGateway;
+import com.bancolombia.dojo.reactivecommons.gateways.ReplyRouter;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import com.bancolombia.dojo.reactivecommons.model.Task;
@@ -28,6 +29,7 @@ public class TaskController {
     private final TaskRepository repository;
     private final EventGateway eventGateway;
     private final CommandGateway commandGateway;
+    private final ReplyRouter replyRouter;
 
     @GetMapping(path = "/tasks/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<List<Task>> listTasks(@PathVariable("name") String name) {
@@ -40,7 +42,7 @@ public class TaskController {
                         .map(TaskList::getTaskList);
 
             return eventGateway.emitWhoIs(Whois.builder().who(name).replyTo(constants.getAppName()).build())
-                    .then(eventGateway.register(name)
+                    .then(replyRouter.register(name)
                             .flatMap(this::saveRoute)
                             .flatMap(saveWho -> commandGateway.getRemoteTasks(saveWho.getAppName(), name))
                     ).map(TaskList::getTaskList);
@@ -57,7 +59,7 @@ public class TaskController {
                         .thenReturn("Task sent with cache!");
 
             return eventGateway.emitWhoIs(Whois.builder().who(name).replyTo(constants.getAppName()).build())
-                    .then(eventGateway.register(name)
+                    .then(replyRouter.register(name)
                             .flatMap(this::saveRoute)
                             .flatMap(saveWho -> commandGateway.saveTask(task, saveWho.getAppName()))
                             .thenReturn("Task sent!")

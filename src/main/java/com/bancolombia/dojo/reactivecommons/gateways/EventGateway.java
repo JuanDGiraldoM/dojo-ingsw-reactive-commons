@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EventGateway {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventGateway.class);
 
-    private final ConcurrentHashMap<String, UnicastProcessor<SaveWho>> processors = new ConcurrentHashMap<>();
     private final DomainEventBus eventBus;
 
     public Mono<String> emitWhoIs(Whois whois) {
@@ -30,19 +29,5 @@ public class EventGateway {
         return Mono.from(eventBus.emit(event))
                 .doOnNext(s -> LOGGER.error("Should not be called!"))
                 .thenReturn("Event sent!");
-    }
-
-    public Mono<SaveWho> register(String correlationID) {
-        final UnicastProcessor<SaveWho> processor = UnicastProcessor.create(Queues.<SaveWho>one().get());
-        processors.put(correlationID, processor);
-        return processor.singleOrEmpty();
-    }
-
-    public void routeReply(String correlationID, SaveWho data) {
-        final UnicastProcessor<SaveWho> processor = processors.remove(correlationID);
-        if (processor != null) {
-            processor.onNext(data);
-            processor.onComplete();
-        }
     }
 }
