@@ -1,6 +1,8 @@
 package com.bancolombia.dojo.reactivecommons.config;
 
 import com.bancolombia.dojo.reactivecommons.gateways.CommandGateway;
+import com.bancolombia.dojo.reactivecommons.gateways.ReplyRouter;
+import com.bancolombia.dojo.reactivecommons.messages.SaveTask;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +24,15 @@ public class ListenerConfig {
 
     private final Constants constants;
     private final CommandGateway commandGateway;
+    private final TaskRepository repository;
+    private final ReplyRouter replyRouter;
 
     @Bean
     public HandlerRegistry handlerRegistry() {
         return HandlerRegistry.register()
                 .listenEvent(Whois.NAME, this::listenWhois, Whois.class)
-                .handleCommand(SaveWho.NAME, this::handleSaveWho, SaveWho.class);
+                .handleCommand(SaveWho.NAME, this::handleSaveWho, SaveWho.class)
+                .handleCommand(SaveTask.NAME, this::handleSaveTask, SaveTask.class);
     }
 
     public Mono<Void> listenWhois(DomainEvent<Whois> event) {
@@ -42,7 +47,15 @@ public class ListenerConfig {
     }
 
     public Mono<Void> handleSaveWho(Command<SaveWho> command) {
-        LOGGER.info("Command Received from {}...", command.getData().getWho());
+        LOGGER.info("Command Received from {} with appName {}...", command.getData().getWho(),
+                command.getData().getAppName());
+        replyRouter.routeReply(command.getData().getWho(), command.getData());
+        return Mono.empty();
+    }
+
+    public Mono<Void> handleSaveTask(Command<SaveTask> command) {
+        LOGGER.info("Saving Task with Name {}...", command.getData().getName());
+        repository.saveTask(command.getData());
         return Mono.empty();
     }
 }
