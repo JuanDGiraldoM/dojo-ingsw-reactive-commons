@@ -1,6 +1,7 @@
-package com.bancolombia.dojo.reactivecommons.config;
+package com.bancolombia.dojo.reactivecommons.gateways;
 
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
+import lombok.AllArgsConstructor;
 import org.reactivecommons.api.domain.Command;
 import org.reactivecommons.async.api.DirectAsyncGateway;
 import org.reactivecommons.async.impl.config.annotations.EnableDirectAsyncGateway;
@@ -12,9 +13,9 @@ import java.util.UUID;
 
 @Component
 @EnableDirectAsyncGateway
+@AllArgsConstructor
 public class CommandGateway {
 
-    @Autowired
     private DirectAsyncGateway directAsyncGateway;
 
     public Mono<Void> saveWho(SaveWho saveWho, String target) {

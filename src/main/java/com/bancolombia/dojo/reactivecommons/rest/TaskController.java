@@ -1,8 +1,8 @@
 package com.bancolombia.dojo.reactivecommons.rest;
 
 import com.bancolombia.dojo.reactivecommons.config.Constants;
-import com.bancolombia.dojo.reactivecommons.config.EventGateway;
 import com.bancolombia.dojo.reactivecommons.config.TaskRepository;
+import com.bancolombia.dojo.reactivecommons.gateways.EventGateway;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import com.bancolombia.dojo.reactivecommons.model.Task;
 import lombok.RequiredArgsConstructor;

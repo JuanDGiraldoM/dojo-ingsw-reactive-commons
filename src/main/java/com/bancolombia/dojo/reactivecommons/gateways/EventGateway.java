@@ -1,6 +1,7 @@
-package com.bancolombia.dojo.reactivecommons.config;
+package com.bancolombia.dojo.reactivecommons.gateways;
 
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
+import lombok.AllArgsConstructor;
 import org.reactivecommons.api.domain.DomainEvent;
 import org.reactivecommons.api.domain.DomainEventBus;
 import org.reactivecommons.async.impl.config.annotations.EnableDomainEventBus;
@@ -14,10 +15,10 @@ import java.util.UUID;
 
 @Component
 @EnableDomainEventBus
+@AllArgsConstructor
 public class EventGateway {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventGateway.class);
 
-    @Autowired
     private DomainEventBus eventBus;
 
     public Mono<String> emitWhoIs(Whois whois) {

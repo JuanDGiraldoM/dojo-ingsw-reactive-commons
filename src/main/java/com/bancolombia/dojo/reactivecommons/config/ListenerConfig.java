@@ -1,24 +1,18 @@
 package com.bancolombia.dojo.reactivecommons.config;
 
+import com.bancolombia.dojo.reactivecommons.gateways.CommandGateway;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
-import com.rabbitmq.client.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.api.domain.Command;
 import org.reactivecommons.api.domain.DomainEvent;
 import org.reactivecommons.async.api.HandlerRegistry;
-import org.reactivecommons.async.impl.config.ConnectionFactoryProvider;
 import org.reactivecommons.async.impl.config.annotations.EnableMessageListeners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
 @EnableMessageListeners
 @RequiredArgsConstructor
@@ -28,26 +22,6 @@ public class ListenerConfig {
 
     private final Constants constants;
     private final CommandGateway commandGateway;
-
-    private void configureSsl(ConnectionFactory connectionFactory) {
-        try {
-            connectionFactory.useSslProtocol();
-        } catch (NoSuchAlgorithmException | KeyManagementException exception) {
-            LOGGER.error(exception.getMessage());
-        }
-    }
-
-    @Bean
-    @Primary
-    public ConnectionFactoryProvider connection(RabbitProperties rabbitProperties) {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(rabbitProperties.getHost());
-        connectionFactory.setPort(rabbitProperties.getPort());
-        connectionFactory.setUsername(rabbitProperties.getUsername());
-        connectionFactory.setPassword(rabbitProperties.getPassword());
-        configureSsl(connectionFactory);
-        return () -> connectionFactory;
-    }
 
     @Bean
     public HandlerRegistry handlerRegistry() {
