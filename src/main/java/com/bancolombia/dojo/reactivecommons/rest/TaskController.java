@@ -7,6 +7,7 @@ import com.bancolombia.dojo.reactivecommons.gateways.ReplyRouter;
 import com.bancolombia.dojo.reactivecommons.messages.SaveWho;
 import com.bancolombia.dojo.reactivecommons.messages.Whois;
 import com.bancolombia.dojo.reactivecommons.model.Task;
+import com.bancolombia.dojo.reactivecommons.model.TaskList;
 import com.bancolombia.dojo.reactivecommons.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
@@ -35,8 +37,23 @@ public class TaskController {
     private final ConcurrentHashMap<String, String> routingTable = new ConcurrentHashMap<>();
 
     @GetMapping(path = "/tasks/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Void> listTasks(@PathVariable("name") String name) {
-        return Mono.empty();
+    public Mono<List<Task>> listTasks(@PathVariable("name") String name) {
+        if (name.equals(constants.getNameWho())) {
+            return repository.getTaskList().map(TaskList::getTaskList);
+        }
+        else {
+            if (routingTable.containsKey(name)) {
+                return commandGateway.getRemoteTasks(name, constants.getAppName())
+                        .map(TaskList::getTaskList);
+            }
+
+            return eventGateway.emitWhoIs(Whois.builder().who(name).replyTo(constants.getAppName()).build())
+                    .then(replyRouter.register(name)
+                            .flatMap(this::saveRoute)
+                            .flatMap(saveWho -> commandGateway.getRemoteTasks(saveWho.getAppName(), constants.getAppName()))
+                    )
+                    .map(TaskList::getTaskList);
+        }
     }
 
     @PostMapping(path = "/tasks/{name}", consumes = MediaType.APPLICATION_JSON_VALUE)
