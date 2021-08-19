@@ -1,4 +1,4 @@
-package com.bancolombia.dojo.reactivecommons.config;
+package com.bancolombia.dojo.reactivecommons.repository;
 
 import com.bancolombia.dojo.reactivecommons.model.Task;
 import com.bancolombia.dojo.reactivecommons.model.TaskList;
