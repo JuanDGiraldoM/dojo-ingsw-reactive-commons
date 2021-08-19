@@ -24,7 +24,6 @@ public class ReplyRouter {
         final Sinks.One<SaveWho> processor = processors.remove(correlationID);
         if (processor != null) {
             processor.tryEmitValue(data);
-            processors.remove(correlationID);
         }
     }
 }

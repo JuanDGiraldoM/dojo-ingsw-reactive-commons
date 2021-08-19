@@ -38,7 +38,7 @@ public class TaskController {
                     .map(TaskList::getTaskList);
         else {
             if (routingTable.containsKey(name))
-                return commandGateway.getRemoteTasks(routingTable.get(name), name)
+                return commandGateway.getRemoteTasks(routingTable.get(name), constants.getAppName())
                         .map(TaskList::getTaskList);
 
             return eventGateway.emitWhoIs(Whois.builder().who(name).replyTo(constants.getAppName()).build())

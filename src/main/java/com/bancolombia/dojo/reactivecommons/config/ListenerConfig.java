@@ -29,7 +29,6 @@ public class ListenerConfig {
     private final Constants constants;
     private final TaskRepository repository;
     private final CommandGateway commandGateway;
-    private final EventGateway eventGateway;
     private final ReplyRouter replyRouter;
 
     @Bean

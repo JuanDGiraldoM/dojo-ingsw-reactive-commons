@@ -22,7 +22,6 @@ import java.util.UUID;
 public class CommandGateway {
 
     private final DirectAsyncGateway directAsyncGateway;
-    private final Constants constants;
 
     public Mono<Void> saveWho(SaveWho saveWho, String target) {
         Command<SaveWho> command = new Command<>(SaveWho.NAME, UUID.randomUUID().toString(), saveWho);
@@ -37,7 +36,7 @@ public class CommandGateway {
     public Mono<TaskList> getRemoteTasks(String target, String appName) {
         QueryTasks queryTasks = QueryTasks.builder()
                 .personName(target)
-                .requester(constants.getAppName())
+                .requester(appName)
                 .build();
         AsyncQuery<QueryTasks> asyncQuery = new AsyncQuery<>(QueryTasks.NAME, queryTasks);
         return directAsyncGateway.requestReply(asyncQuery, target, TaskList.class);
